@@ -1,6 +1,8 @@
 import express from 'express';
-import connect from './db.js';
 import mongoose from 'mongoose';
+import cors from 'cors';
+import connect from './db.js';
+import auth from './auth.js';
 
 mongoose.connect(
 	'mongodb+srv://admin:admin@cluster0.xkwtleo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
@@ -9,11 +11,8 @@ mongoose.connect(
 const app = express();
 const db = await connect();
 
-app.use(function (req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-	next();
-});
+app.use(cors());
+app.use(express.json());
 
 app.get('/api', (req, res) => {
 	res.json({ users: ['user1', 'user2', 'user3'] });
@@ -28,7 +27,16 @@ app.get('/users', async (req, res) => {
 
 	res.json(users);
 });
-app.post('/users', async (req, res) => {});
+app.post('/users', async (req, res) => {
+	let user = req.body;
+
+	try {
+		const id = await auth.registerUser(user);
+		res.json({ id });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
 
 app.get('/users/:userId', async (req, res) => {});
 app.patch('/users/:userId', async (req, res) => {});
