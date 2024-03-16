@@ -18,6 +18,21 @@ app.get('/api', (req, res) => {
 	res.json({ users: ['user1', 'user2', 'user3'] });
 });
 
+app.get('/secret', [auth.verify], (req, res) => {
+	res.json({ message: 'This is a secret message ' + req.jwt.username });
+});
+
+app.post('/auth', async (req, res) => {
+	const user = req.body;
+
+	try {
+		const result = await auth.authenticateUser(user.username, user.password);
+		res.json(result);
+	} catch (e) {
+		res.status(401).json({ error: e.message });
+	}
+});
+
 app.get('/users', async (req, res) => {
 	const users = await db.collection('users').find().toArray();
 
