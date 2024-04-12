@@ -67,9 +67,16 @@ app.delete('/users/:userId/profiles/:profileId', async (req, res) => {});
 app.get('/equipment', async (req, res) => {});
 app.post('/equipment', async (req, res) => {});
 
-app.get('/equipment/:equipmentId', async (req, res) => {});
-app.patch('/equipment/:equipmentId', async (req, res) => {});
-app.delete('/equipment/:equipmentId', async (req, res) => {});
+app.get('/equipment/:adminId/:name', async (req, res) => {
+	const equipment = await db
+		.collection('equipment')
+		.find({ adminId: req.params.adminId, name: req.params.name })
+		.toArray();
+
+	res.json(equipment);
+});
+app.patch('/equipment/:adminId/:name', async (req, res) => {});
+app.delete('/equipment/:adminId/:name', async (req, res) => {});
 
 app.listen(3000, () => {
 	console.log('Server is running on port 3000');
