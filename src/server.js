@@ -1,4 +1,5 @@
 import express from 'express';
+import mongo from 'mongodb';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import connect from './db.js';
@@ -13,10 +14,6 @@ const db = await connect();
 
 app.use(cors());
 app.use(express.json());
-
-app.get('/api', (req, res) => {
-	res.json({ users: ['user1', 'user2', 'user3'] });
-});
 
 app.get('/secret', [auth.verify], (req, res) => {
 	res.json({ message: 'This is a secret message ' + req.jwt.username });
@@ -42,6 +39,7 @@ app.get('/users', async (req, res) => {
 
 	res.json(users);
 });
+
 app.post('/users', async (req, res) => {
 	let user = req.body;
 
@@ -57,10 +55,29 @@ app.get('/users/:userId', async (req, res) => {});
 app.patch('/users/:userId', async (req, res) => {});
 app.delete('/users/:userId', async (req, res) => {});
 
-app.get('/users/:userId/profiles', async (req, res) => {});
-app.post('/users/:userId/profiles', async (req, res) => {});
+app.get('/users/:userId/profiles', async (req, res) => {
+	const profiles = await db.collection('profiles').find({ adminId: req.params.userId }).toArray();
 
-app.get('/users/:userId/profiles/:profileId', async (req, res) => {}); /* Praćenje prihoda pojedinog radnika? */
+	res.json(profiles);
+});
+app.post('/users/:userId/profiles', async (req, res) => {
+	let profile = req.body;
+
+	try {
+		const id = await auth.createProfile(profile);
+		res.json({ id });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.get('/users/:userId/profiles/:profileId', async (req, res) => {
+	const profile = await db
+		.collection('profiles')
+		.findOne({ _id: new mongo.ObjectId(req.params.profileId), adminId: req.params.userId });
+
+	res.json(profile);
+}); /* Praćenje prihoda pojedinog radnika? */
 app.patch('/users/:userId/profiles/:profileId', async (req, res) => {});
 app.delete('/users/:userId/profiles/:profileId', async (req, res) => {});
 

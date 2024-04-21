@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
 import mongo from 'mongodb';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -32,6 +31,25 @@ export default {
 			}
 		}
 	},
+	async createProfile(profileData) {
+		const db = await connect();
+
+		let doc = {
+			adminId: profileData.adminId,
+			name: profileData.name,
+			surname: profileData.surname,
+			password: await bcrypt.hash(profileData.password, 8),
+		};
+		try {
+			const result = await db.collection('profiles').insertOne(doc);
+
+			if (result && result.insertedId) {
+				return result.insertedId;
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	},
 	async authenticateUser(username, password) {
 		const db = await connect();
 		const user = await db.collection('users').findOne({ username });
@@ -45,6 +63,7 @@ export default {
 			return {
 				token,
 				username: user.username,
+				adminId: user._id,
 			};
 		} else {
 			throw new Error('Cannot authenticate');
