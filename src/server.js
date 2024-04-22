@@ -30,6 +30,17 @@ app.post('/auth', async (req, res) => {
 	}
 });
 
+app.post('/authProfile', async (req, res) => {
+	const profile = req.body;
+
+	try {
+		const result = await auth.authenticateProfile(profile);
+		res.json(result);
+	} catch (e) {
+		res.status(401).json({ error: e.message });
+	}
+});
+
 app.get('/users', async (req, res) => {
 	const users = await db.collection('users').find().toArray();
 

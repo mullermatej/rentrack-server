@@ -69,6 +69,28 @@ export default {
 			throw new Error('Cannot authenticate');
 		}
 	},
+	async authenticateProfile(profile) {
+		const db = await connect();
+		const profileData = await db
+			.collection('profiles')
+			.findOne({ adminId: profile.adminId, name: profile.name, surname: profile.surname });
+
+		if (profileData && profileData.password && (await bcrypt.compare(profile.password, profileData.password))) {
+			delete profileData.password;
+			let token = jwt.sign(profileData, process.env.JWT_SECRET, {
+				algorithm: 'HS512',
+				expiresIn: '1 week',
+			});
+			return {
+				token,
+				name: profileData.name,
+				surname: profileData.surname,
+				profileId: profileData._id,
+			};
+		} else {
+			throw new Error('Cannot authenticate');
+		}
+	},
 	async verify(req, res, next) {
 		try {
 			const authorization = req.headers.authorization.split(' ');
