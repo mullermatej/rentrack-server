@@ -41,6 +41,17 @@ app.post('/authProfile', async (req, res) => {
 	}
 });
 
+app.post('/auth/equipment', async (req, res) => {
+	const user = req.body;
+
+	try {
+		const result = await auth.authenticateEquipmentAdd(user.username, user.password);
+		res.json(result);
+	} catch (e) {
+		res.status(401).json({ error: e.message });
+	}
+});
+
 app.get('/users', async (req, res) => {
 	const users = await db.collection('users').find().toArray();
 
@@ -92,8 +103,25 @@ app.get('/users/:userId/profiles/:profileId', async (req, res) => {
 app.patch('/users/:userId/profiles/:profileId', async (req, res) => {});
 app.delete('/users/:userId/profiles/:profileId', async (req, res) => {});
 
-app.get('/equipment', async (req, res) => {});
-app.post('/equipment', async (req, res) => {});
+app.get('/equipment/:adminId', async (req, res) => {
+	const equipment = await db.collection('equipment').find({ adminId: req.params.adminId }).toArray();
+
+	res.json(equipment);
+});
+app.post('/equipment', async (req, res) => {
+	const equipment = req.body;
+	const doc = {
+		adminId: equipment.adminId,
+		name: equipment.name,
+		addedEquipment: [],
+	};
+	try {
+		const result = await db.collection('equipment').insertOne(doc);
+		res.json(result);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
 
 app.get('/equipment/:adminId/:name', async (req, res) => {
 	const equipment = await db

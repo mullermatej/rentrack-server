@@ -91,6 +91,19 @@ export default {
 			throw new Error('Cannot authenticate');
 		}
 	},
+	async authenticateEquipmentAdd(username, password) {
+		const db = await connect();
+		const user = await db.collection('users').findOne({ username });
+
+		if (user && user.password && (await bcrypt.compare(password, user.password))) {
+			delete user.password;
+			return {
+				message: 'Authenticated',
+			};
+		} else {
+			throw new Error('Cannot authenticate');
+		}
+	},
 	async verify(req, res, next) {
 		try {
 			const authorization = req.headers.authorization.split(' ');
