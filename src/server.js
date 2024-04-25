@@ -113,6 +113,7 @@ app.post('/equipment', async (req, res) => {
 	const doc = {
 		adminId: equipment.adminId,
 		name: equipment.name,
+		prices: equipment.prices,
 		addedEquipment: [],
 	};
 	try {
@@ -131,7 +132,37 @@ app.get('/equipment/:adminId/:name', async (req, res) => {
 
 	res.json(equipment);
 });
-app.patch('/equipment/:adminId/:name', async (req, res) => {});
+
+app.patch('/equipment/:adminId/:name', async (req, res) => {
+	const equipment = req.body;
+
+	try {
+		const result = await db.collection('equipment').findOneAndUpdate(
+			{
+				adminId: req.params.adminId,
+				name: req.params.name,
+				'addedEquipment.id': equipment.equipmentId,
+			},
+			{
+				$set: {
+					'addedEquipment.$.availability': equipment.availability,
+					'addedEquipment.$.endTime': equipment.endTime,
+				},
+				$push: {
+					'addedEquipment.$.history': {
+						date: equipment.historyDate,
+						worker: equipment.historyWorker,
+						hours: equipment.hours,
+						price: equipment.price,
+					},
+				},
+			}
+		);
+		res.json({ message: 'Equipment updated' });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
 app.delete('/equipment/:adminId/:name', async (req, res) => {});
 
 app.listen(3000, () => {
