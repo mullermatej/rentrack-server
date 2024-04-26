@@ -133,6 +133,19 @@ app.get('/equipment/:adminId/:name', async (req, res) => {
 	res.json(equipment);
 });
 
+app.post('/equipment/:adminId/:name', async (req, res) => {
+	const doc = req.body;
+
+	try {
+		const result = await db
+			.collection('equipment')
+			.updateOne({ adminId: req.params.adminId, name: req.params.name }, { $push: { addedEquipment: doc } });
+		res.json(result);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
 app.patch('/equipment/:adminId/:name', async (req, res) => {
 	const equipment = req.body;
 
