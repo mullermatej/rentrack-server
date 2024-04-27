@@ -176,7 +176,32 @@ app.patch('/equipment/:adminId/:name', async (req, res) => {
 		res.status(500).json({ error: e.message });
 	}
 });
+
 app.delete('/equipment/:adminId/:name', async (req, res) => {});
+
+app.patch('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
+	const equipment = req.body;
+	const equipmentId = parseInt(req.params.equipmentId);
+
+	try {
+		const result = await db.collection('equipment').findOneAndUpdate(
+			{
+				adminId: req.params.adminId,
+				name: req.params.name,
+				'addedEquipment.id': equipmentId,
+			},
+			{
+				$set: {
+					'addedEquipment.$.availability': equipment.availability,
+					'addedEquipment.$.endTime': equipment.endTime,
+				},
+			}
+		);
+		res.json({ message: "Equipment's set to available" });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
 
 app.listen(3000, () => {
 	console.log('Server is running on port 3000');
