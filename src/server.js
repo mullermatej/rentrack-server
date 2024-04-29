@@ -99,8 +99,24 @@ app.get('/users/:userId/profiles/:profileId', async (req, res) => {
 		.findOne({ _id: new mongo.ObjectId(req.params.profileId), adminId: req.params.userId });
 
 	res.json(profile);
-}); /* Praćenje prihoda pojedinog radnika? */
-app.patch('/users/:userId/profiles/:profileId', async (req, res) => {});
+});
+
+app.patch('/users/:userId/profiles/:profileId', async (req, res) => {
+	const profile = req.body;
+
+	try {
+		const result = await db
+			.collection('profiles')
+			.updateOne(
+				{ _id: new mongo.ObjectId(req.params.profileId), adminId: req.params.userId },
+				{ $inc: { income: profile.income } }
+			);
+		res.json(result);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
 app.delete('/users/:userId/profiles/:profileId', async (req, res) => {});
 
 app.get('/equipment/:adminId', async (req, res) => {
@@ -198,6 +214,34 @@ app.patch('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
 			}
 		);
 		res.json({ message: "Equipment's set to available" });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.post('/equipment/:adminId/:name/prices', async (req, res) => {
+	const { hours, price } = req.body;
+	const { adminId, name } = req.params;
+
+	try {
+		const result = await db
+			.collection('equipment')
+			.updateOne({ adminId, name }, { $set: { [`prices.${hours}`]: price } });
+		res.json(result);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.delete('/equipment/:adminId/:name/prices', async (req, res) => {
+	const { hours } = req.body;
+	const { adminId, name } = req.params;
+
+	try {
+		const result = await db
+			.collection('equipment')
+			.updateOne({ adminId, name }, { $unset: { [`prices.${hours}`]: '' } });
+		res.json(result);
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}
