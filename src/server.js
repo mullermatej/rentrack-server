@@ -23,7 +23,7 @@ app.post('/auth', async (req, res) => {
 	const user = req.body;
 
 	try {
-		const result = await auth.authenticateUser(user.username, user.password);
+		const result = await auth.authenticateUser(user.email, user.password);
 		res.json(result);
 	} catch (e) {
 		res.status(401).json({ error: e.message });
@@ -193,7 +193,14 @@ app.patch('/equipment/:adminId/:name', async (req, res) => {
 	}
 });
 
-app.delete('/equipment/:adminId/:name', async (req, res) => {});
+app.delete('/equipment/:adminId/:name', async (req, res) => {
+	try {
+		await db.collection('equipment').deleteOne({ adminId: req.params.adminId, name: req.params.name });
+		res.json({ message: 'Equipment deleted' });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
 
 app.patch('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
 	const equipment = req.body;
@@ -214,6 +221,22 @@ app.patch('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
 			}
 		);
 		res.json({ message: "Equipment's set to available" });
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.delete('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
+	const equipmentId = parseInt(req.params.equipmentId);
+
+	try {
+		await db
+			.collection('equipment')
+			.findOneAndUpdate(
+				{ adminId: req.params.adminId, name: req.params.name },
+				{ $pull: { addedEquipment: { id: equipmentId } } }
+			);
+		res.json({ message: 'Equipment deleted' });
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}

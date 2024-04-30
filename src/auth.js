@@ -7,8 +7,7 @@ import connect from './db.js';
 
 (async () => {
 	const db = await connect();
-	// Kreiraj indeks na polje username u kolekciji users, koji je jedinstven
-	await db.collection('users').createIndex({ username: 1 }, { unique: true });
+	await db.collection('users').createIndex({ email: 1 }, { unique: true });
 })();
 
 export default {
@@ -16,7 +15,9 @@ export default {
 		const db = await connect();
 
 		let doc = {
-			username: userData.username,
+			name: userData.name,
+			surname: userData.surname,
+			email: userData.email,
 			password: await bcrypt.hash(userData.password, 8),
 		};
 		try {
@@ -27,7 +28,7 @@ export default {
 			}
 		} catch (e) {
 			if (e.code === 11000) {
-				throw new Error(`User '${e.keyValue.username}' already exists`);
+				throw new Error(`Email '${e.keyValue.email}' already exists`);
 			}
 		}
 	},
@@ -50,9 +51,9 @@ export default {
 			console.log(e);
 		}
 	},
-	async authenticateUser(username, password) {
+	async authenticateUser(email, password) {
 		const db = await connect();
-		const user = await db.collection('users').findOne({ username });
+		const user = await db.collection('users').findOne({ email });
 
 		if (user && user.password && (await bcrypt.compare(password, user.password))) {
 			delete user.password;
@@ -62,7 +63,7 @@ export default {
 			});
 			return {
 				token,
-				username: user.username,
+				email: user.email,
 				adminId: user._id,
 			};
 		} else {
