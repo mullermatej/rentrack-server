@@ -242,6 +242,22 @@ app.delete('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
 	}
 });
 
+app.get('/equipment/:adminId/:name/profit', async (req, res) => {
+	const equipment = await db
+		.collection('equipment')
+		.find({ adminId: req.params.adminId, name: req.params.name })
+		.toArray();
+
+	let profit = 0;
+	equipment[0].addedEquipment.forEach((element) => {
+		element.history.forEach((item) => {
+			profit += parseInt(item.price);
+		});
+	});
+
+	res.json({ profit });
+});
+
 app.post('/equipment/:adminId/:name/prices', async (req, res) => {
 	const { hours, price } = req.body;
 	const { adminId, name } = req.params;

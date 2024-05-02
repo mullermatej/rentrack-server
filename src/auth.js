@@ -40,6 +40,7 @@ export default {
 			name: profileData.name,
 			surname: profileData.surname,
 			password: await bcrypt.hash(profileData.password, 8),
+			income: 0,
 		};
 		try {
 			const result = await db.collection('profiles').insertOne(doc);
