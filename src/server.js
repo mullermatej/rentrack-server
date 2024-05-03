@@ -193,6 +193,20 @@ app.patch('/equipment/:adminId/:name', async (req, res) => {
 	}
 });
 
+app.delete('/equipment/:adminId/:name/prices', async (req, res) => {
+	const { hours } = req.body;
+	const { adminId, name } = req.params;
+
+	try {
+		const result = await db
+			.collection('equipment')
+			.updateOne({ adminId, name }, { $unset: { [`prices.${hours}`]: '' } });
+		res.json(result);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
 app.delete('/equipment/:adminId/:name', async (req, res) => {
 	try {
 		await db.collection('equipment').deleteOne({ adminId: req.params.adminId, name: req.params.name });
@@ -266,20 +280,6 @@ app.post('/equipment/:adminId/:name/prices', async (req, res) => {
 		const result = await db
 			.collection('equipment')
 			.updateOne({ adminId, name }, { $set: { [`prices.${hours}`]: price } });
-		res.json(result);
-	} catch (e) {
-		res.status(500).json({ error: e.message });
-	}
-});
-
-app.delete('/equipment/:adminId/:name/prices', async (req, res) => {
-	const { hours } = req.body;
-	const { adminId, name } = req.params;
-
-	try {
-		const result = await db
-			.collection('equipment')
-			.updateOne({ adminId, name }, { $unset: { [`prices.${hours}`]: '' } });
 		res.json(result);
 	} catch (e) {
 		res.status(500).json({ error: e.message });
