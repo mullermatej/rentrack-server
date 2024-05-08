@@ -124,6 +124,16 @@ app.get('/equipment/:adminId', async (req, res) => {
 
 	res.json(equipment);
 });
+
+app.get('/equipment/:adminId/:name/features', async (req, res) => {
+	const equipment = await db
+		.collection('equipment')
+		.find({ adminId: req.params.adminId, name: req.params.name })
+		.toArray();
+
+	res.json(equipment[0].features);
+});
+
 app.post('/equipment', async (req, res) => {
 	const equipment = req.body;
 	const doc = {
@@ -131,6 +141,7 @@ app.post('/equipment', async (req, res) => {
 		name: equipment.name,
 		prices: equipment.prices,
 		addedEquipment: [],
+		features: equipment.features,
 	};
 	try {
 		const result = await db.collection('equipment').insertOne(doc);
