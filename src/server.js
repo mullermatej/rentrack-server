@@ -23,7 +23,7 @@ app.post('/auth', async (req, res) => {
 	const user = req.body;
 
 	try {
-		const result = await auth.authenticateUser(user.email, user.password);
+		const result = await auth.authenticateUser(user.oib, user.password);
 		res.json(result);
 	} catch (e) {
 		res.status(401).json({ error: e.message });
@@ -77,12 +77,12 @@ app.get('/users/:userId', async (req, res) => {});
 app.patch('/users/:userId', async (req, res) => {});
 app.delete('/users/:userId', async (req, res) => {});
 
-app.get('/users/:userId/profiles', async (req, res) => {
-	const profiles = await db.collection('profiles').find({ adminId: req.params.userId }).toArray();
+app.get('/users/:businessId/profiles', async (req, res) => {
+	const profiles = await db.collection('profiles').find({ businessId: req.params.businessId }).toArray();
 
 	res.json(profiles);
 });
-app.post('/users/:userId/profiles', async (req, res) => {
+app.post('/users/:businessId/profiles', async (req, res) => {
 	let profile = req.body;
 
 	try {

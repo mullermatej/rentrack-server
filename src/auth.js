@@ -16,8 +16,7 @@ export default {
 
 		let doc = {
 			name: userData.name,
-			surname: userData.surname,
-			email: userData.email,
+			oib: userData.oib,
 			password: await bcrypt.hash(userData.password, 8),
 		};
 		try {
@@ -36,10 +35,9 @@ export default {
 		const db = await connect();
 
 		let doc = {
-			adminId: profileData.adminId,
+			businessId: profileData.businessId,
 			name: profileData.name,
 			surname: profileData.surname,
-			password: await bcrypt.hash(profileData.password, 8),
 			income: 0,
 		};
 		try {
@@ -52,9 +50,9 @@ export default {
 			console.log(e);
 		}
 	},
-	async authenticateUser(email, password) {
+	async authenticateUser(oib, password) {
 		const db = await connect();
-		const user = await db.collection('users').findOne({ email });
+		const user = await db.collection('users').findOne({ oib });
 
 		if (user && user.password && (await bcrypt.compare(password, user.password))) {
 			delete user.password;
@@ -64,8 +62,9 @@ export default {
 			});
 			return {
 				token,
-				email: user.email,
-				adminId: user._id,
+				oib: user.oib,
+				name: user.name,
+				businessId: user._id,
 			};
 		} else {
 			throw new Error('Cannot authenticate');
@@ -75,16 +74,10 @@ export default {
 		const db = await connect();
 		const profileData = await db
 			.collection('profiles')
-			.findOne({ adminId: profile.adminId, name: profile.name, surname: profile.surname });
+			.findOne({ businessId: profile.businessId, name: profile.name, surname: profile.surname });
 
-		if (profileData && profileData.password && (await bcrypt.compare(profile.password, profileData.password))) {
-			delete profileData.password;
-			let token = jwt.sign(profileData, process.env.JWT_SECRET, {
-				algorithm: 'HS512',
-				expiresIn: '1 week',
-			});
+		if (profileData) {
 			return {
-				token,
 				name: profileData.name,
 				surname: profileData.surname,
 				profileId: profileData._id,
