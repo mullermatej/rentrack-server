@@ -119,16 +119,16 @@ app.patch('/users/:userId/profiles/:profileId', async (req, res) => {
 
 app.delete('/users/:userId/profiles/:profileId', async (req, res) => {});
 
-app.get('/equipment/:adminId', async (req, res) => {
-	const equipment = await db.collection('equipment').find({ adminId: req.params.adminId }).toArray();
+app.get('/equipment/:businessId', async (req, res) => {
+	const equipment = await db.collection('equipment').find({ businessId: req.params.businessId }).toArray();
 
 	res.json(equipment);
 });
 
-app.get('/equipment/:adminId/:name/features', async (req, res) => {
+app.get('/equipment/:businessId/:name/features', async (req, res) => {
 	const equipment = await db
 		.collection('equipment')
-		.find({ adminId: req.params.adminId, name: req.params.name })
+		.find({ businessId: req.params.businessId, name: req.params.name })
 		.toArray();
 
 	res.json(equipment[0].features);
@@ -137,7 +137,7 @@ app.get('/equipment/:adminId/:name/features', async (req, res) => {
 app.post('/equipment', async (req, res) => {
 	const equipment = req.body;
 	const doc = {
-		adminId: equipment.adminId,
+		businessId: equipment.businessId,
 		name: equipment.name,
 		prices: equipment.prices,
 		addedEquipment: [],
@@ -151,10 +151,10 @@ app.post('/equipment', async (req, res) => {
 	}
 });
 
-app.get('/equipment/:adminId/:name', async (req, res) => {
+app.get('/equipment/:businessId/:name', async (req, res) => {
 	const equipment = await db
 		.collection('equipment')
-		.find({ adminId: req.params.adminId, name: req.params.name })
+		.find({ businessId: req.params.businessId, name: req.params.name })
 		.toArray();
 
 	res.json(equipment);
@@ -267,10 +267,10 @@ app.delete('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
 	}
 });
 
-app.get('/equipment/:adminId/:name/profit', async (req, res) => {
+app.get('/equipment/:businessId/:name/profit', async (req, res) => {
 	const equipment = await db
 		.collection('equipment')
-		.find({ adminId: req.params.adminId, name: req.params.name })
+		.find({ businessId: req.params.businessId, name: req.params.name })
 		.toArray();
 
 	let profit = 0;
