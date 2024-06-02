@@ -41,16 +41,16 @@ app.post('/authProfile', async (req, res) => {
 	}
 });
 
-app.post('/auth/equipment', async (req, res) => {
-	const user = req.body;
+// app.post('/auth/equipment', async (req, res) => {
+// 	const user = req.body;
 
-	try {
-		const result = await auth.authenticateEquipmentAdd(user.username, user.password);
-		res.json(result);
-	} catch (e) {
-		res.status(401).json({ error: e.message });
-	}
-});
+// 	try {
+// 		const result = await auth.authenticateEquipmentAdd(user.username, user.password);
+// 		res.json(result);
+// 	} catch (e) {
+// 		res.status(401).json({ error: e.message });
+// 	}
+// });
 
 app.get('/users', async (req, res) => {
 	const users = await db.collection('users').find().toArray();
@@ -100,7 +100,7 @@ app.get('/users/:userId/profiles/:profileId', async (req, res) => {
 
 	res.json(profile);
 });
-
+// Moguce da je krivi endpoint
 app.patch('/users/:userId/profiles/:profileId', async (req, res) => {
 	const profile = req.body;
 
@@ -134,6 +134,31 @@ app.get('/equipment/:businessId/:name/features', async (req, res) => {
 	res.json(equipment[0].features);
 });
 
+app.get('/equipment/:businessId/:name/profit', async (req, res) => {
+	const equipment = await db
+		.collection('equipment')
+		.find({ businessId: req.params.businessId, name: req.params.name })
+		.toArray();
+
+	let profit = 0;
+	equipment[0].addedEquipment.forEach((element) => {
+		element.history.forEach((item) => {
+			profit += parseInt(item.price);
+		});
+	});
+
+	res.json({ profit });
+});
+
+app.get('/equipment/:businessId/:name', async (req, res) => {
+	const equipment = await db
+		.collection('equipment')
+		.find({ businessId: req.params.businessId, name: req.params.name })
+		.toArray();
+
+	res.json(equipment);
+});
+
 app.post('/equipment', async (req, res) => {
 	const equipment = req.body;
 	const doc = {
@@ -151,35 +176,29 @@ app.post('/equipment', async (req, res) => {
 	}
 });
 
-app.get('/equipment/:businessId/:name', async (req, res) => {
-	const equipment = await db
-		.collection('equipment')
-		.find({ businessId: req.params.businessId, name: req.params.name })
-		.toArray();
-
-	res.json(equipment);
-});
-
-app.post('/equipment/:adminId/:name', async (req, res) => {
+app.post('/equipment/:businessId/:name', async (req, res) => {
 	const doc = req.body;
 
 	try {
 		const result = await db
 			.collection('equipment')
-			.updateOne({ adminId: req.params.adminId, name: req.params.name }, { $push: { addedEquipment: doc } });
+			.updateOne(
+				{ businessId: req.params.businessId, name: req.params.name },
+				{ $push: { addedEquipment: doc } }
+			);
 		res.json(result);
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}
 });
 
-app.patch('/equipment/:adminId/:name', async (req, res) => {
+app.patch('/equipment/:businessId/:name', async (req, res) => {
 	const equipment = req.body;
 
 	try {
 		const result = await db.collection('equipment').findOneAndUpdate(
 			{
-				adminId: req.params.adminId,
+				businessId: req.params.businessId,
 				name: req.params.name,
 				'addedEquipment.id': equipment.equipmentId,
 			},
@@ -218,23 +237,23 @@ app.delete('/equipment/:adminId/:name/prices', async (req, res) => {
 	}
 });
 
-app.delete('/equipment/:adminId/:name', async (req, res) => {
+app.delete('/equipment/:businessId/:name', async (req, res) => {
 	try {
-		await db.collection('equipment').deleteOne({ adminId: req.params.adminId, name: req.params.name });
+		await db.collection('equipment').deleteOne({ businessId: req.params.businessId, name: req.params.name });
 		res.json({ message: 'Equipment deleted' });
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}
 });
 
-app.patch('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
+app.patch('/equipment/:businessId/:name/:equipmentId', async (req, res) => {
 	const equipment = req.body;
 	const equipmentId = parseInt(req.params.equipmentId);
 
 	try {
 		const result = await db.collection('equipment').findOneAndUpdate(
 			{
-				adminId: req.params.adminId,
+				businessId: req.params.businessId,
 				name: req.params.name,
 				'addedEquipment.id': equipmentId,
 			},
@@ -251,36 +270,20 @@ app.patch('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
 	}
 });
 
-app.delete('/equipment/:adminId/:name/:equipmentId', async (req, res) => {
+app.delete('/equipment/:businessId/:name/:equipmentId', async (req, res) => {
 	const equipmentId = parseInt(req.params.equipmentId);
 
 	try {
 		await db
 			.collection('equipment')
 			.findOneAndUpdate(
-				{ adminId: req.params.adminId, name: req.params.name },
+				{ businessId: req.params.businessId, name: req.params.name },
 				{ $pull: { addedEquipment: { id: equipmentId } } }
 			);
 		res.json({ message: 'Equipment deleted' });
 	} catch (e) {
 		res.status(500).json({ error: e.message });
 	}
-});
-
-app.get('/equipment/:businessId/:name/profit', async (req, res) => {
-	const equipment = await db
-		.collection('equipment')
-		.find({ businessId: req.params.businessId, name: req.params.name })
-		.toArray();
-
-	let profit = 0;
-	equipment[0].addedEquipment.forEach((element) => {
-		element.history.forEach((item) => {
-			profit += parseInt(item.price);
-		});
-	});
-
-	res.json({ profit });
 });
 
 app.post('/equipment/:adminId/:name/prices', async (req, res) => {
