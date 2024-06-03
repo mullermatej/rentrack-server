@@ -93,22 +93,23 @@ app.post('/users/:businessId/profiles', async (req, res) => {
 	}
 });
 
-app.get('/users/:userId/profiles/:profileId', async (req, res) => {
+// Na klijentu mozda treba za ovaj endpoint promijeniti userId u businessId
+app.get('/users/:businessId/profiles/:profileId', async (req, res) => {
 	const profile = await db
 		.collection('profiles')
-		.findOne({ _id: new mongo.ObjectId(req.params.profileId), adminId: req.params.userId });
+		.findOne({ _id: new mongo.ObjectId(req.params.profileId), businessId: req.params.businessId });
 
 	res.json(profile);
 });
-// Moguce da je krivi endpoint
-app.patch('/users/:userId/profiles/:profileId', async (req, res) => {
+
+app.patch('/users/:businessId/profiles/:profileId', async (req, res) => {
 	const profile = req.body;
 
 	try {
 		const result = await db
 			.collection('profiles')
 			.updateOne(
-				{ _id: new mongo.ObjectId(req.params.profileId), adminId: req.params.userId },
+				{ _id: new mongo.ObjectId(req.params.profileId), businessId: req.params.businessId },
 				{ $inc: { income: profile.income } }
 			);
 		res.json(result);
