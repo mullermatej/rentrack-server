@@ -168,6 +168,8 @@ app.post('/equipment', async (req, res) => {
 		prices: equipment.prices,
 		addedEquipment: [],
 		features: equipment.features,
+		imageUrl:
+			'https://firebasestorage.googleapis.com/v0/b/rentrack-b7327.appspot.com/o/images%2FHand%20drawn%20summer%20beach.jpg?alt=media&token=b88a9207-ce9e-4e6b-90e6-6cf9036cc277',
 	};
 	try {
 		const result = await db.collection('equipment').insertOne(doc);
@@ -187,6 +189,19 @@ app.post('/equipment/:businessId/:name', async (req, res) => {
 				{ businessId: req.params.businessId, name: req.params.name },
 				{ $push: { addedEquipment: doc } }
 			);
+		res.json(result);
+	} catch (e) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.patch('/equipment/:businessId/:name/newImage', async (req, res) => {
+	const { imageUrl } = req.body;
+
+	try {
+		const result = await db
+			.collection('equipment')
+			.updateOne({ businessId: req.params.businessId, name: req.params.name }, { $set: { imageUrl } });
 		res.json(result);
 	} catch (e) {
 		res.status(500).json({ error: e.message });

@@ -7,12 +7,14 @@ import connect from './db.js';
 
 (async () => {
 	const db = await connect();
-	await db.collection('users').createIndex({ email: 1 }, { unique: true });
+	await db.collection('users').createIndex({ oib: 1 }, { unique: true });
 })();
 
 export default {
 	async registerUser(userData) {
 		const db = await connect();
+
+		console.log('Received userData:', userData);
 
 		let doc = {
 			name: userData.name,
@@ -27,7 +29,7 @@ export default {
 			}
 		} catch (e) {
 			if (e.code === 11000) {
-				throw new Error(`Email '${e.keyValue.email}' already exists`);
+				throw new Error(e);
 			}
 		}
 	},
