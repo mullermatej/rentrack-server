@@ -120,6 +120,12 @@ app.patch('/users/:businessId/profiles/:profileId', async (req, res) => {
 
 app.delete('/users/:userId/profiles/:profileId', async (req, res) => {});
 
+app.get('/equipment', async (req, res) => {
+	const equipment = await db.collection('equipment').find().toArray();
+
+	res.json(equipment);
+});
+
 app.get('/equipment/:businessId', async (req, res) => {
 	const equipment = await db.collection('equipment').find({ businessId: req.params.businessId }).toArray();
 
@@ -169,7 +175,7 @@ app.post('/equipment', async (req, res) => {
 		addedEquipment: [],
 		features: equipment.features,
 		imageUrl:
-			'https://firebasestorage.googleapis.com/v0/b/rentrack-b7327.appspot.com/o/images%2FHand%20drawn%20summer%20beach.jpg?alt=media&token=b88a9207-ce9e-4e6b-90e6-6cf9036cc277',
+			'https://firebasestorage.googleapis.com/v0/b/rentrack-b7327.appspot.com/o/images%2F7251698.jpg?alt=media&token=afb0178f-755f-409d-8bad-1fd4ee63dd88',
 	};
 	try {
 		const result = await db.collection('equipment').insertOne(doc);

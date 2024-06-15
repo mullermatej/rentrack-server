@@ -14,8 +14,6 @@ export default {
 	async registerUser(userData) {
 		const db = await connect();
 
-		console.log('Received userData:', userData);
-
 		let doc = {
 			name: userData.name,
 			oib: userData.oib,
