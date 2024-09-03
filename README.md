@@ -6,6 +6,6 @@ Mentor: doc.dr.sc. Tihomir Orehovački
 
 ## Tehnologije
 
-- Express.js
-- MongoDB
-- Firebase
+- [Express.js](https://expressjs.com/)
+- [MongoDB](https://www.mongodb.com/)
+- [Firebase](https://firebase.google.com/)
