@@ -2,7 +2,7 @@
 
 [Fakultet informatike u Puli](https://fipu.unipu.hr/) <br>
 Završni rad <br>
-Mentor: doc.dr.sc. Tihomir Orehovački
+Mentor: izv.prof.dr.sc. Tihomir Orehovački
 
 ## Tehnologije
 
